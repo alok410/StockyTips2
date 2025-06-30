@@ -1,7 +1,7 @@
 [build]
   base = "frontend"
-  publish = "dist"
-  functions = "netlify/functions"
+  publish = "frontend/dist"             # OR "build" if using CRA
+  functions = "../netlify/functions"
 
 [functions]
   node_bundler = "esbuild"
