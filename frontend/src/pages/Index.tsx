@@ -49,7 +49,7 @@ const handlePayment = async () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        amount: 9900, // ₹99 in paise
+        amount: 100, // ₹99 in paise
       }),
     });
 
@@ -68,7 +68,7 @@ const handlePayment = async () => {
 
     initiatePayment({
       key: "rzp_live_QxWMEYJBmq2amj", // Your Razorpay key ID
-      amount: 9900,
+      amount: 100,
       name: "StockyTips Trading Masterclass",
       description: "Master the Art of Stock Trading - July 05, 2025",
       order_id: data.order_id, // ✅ Add the Razorpay order_id here
