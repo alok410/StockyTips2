@@ -39,22 +39,46 @@ const Index = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const handlePayment = () => {
-    console.log('Initiating Razorpay payment...');
-    
+const handlePayment = async () => {
+  console.log('Calling createOrder');
+
+  try {
+    const res = await fetch("/.netlify/functions/createOrder", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        amount: 9900, // ₹99 in paise
+      }),
+    });
+
+    const data = await res.json();
+
+    if (!data || !data.order_id) {
+      toast({
+        title: "Order creation failed",
+        description: "Unable to generate Razorpay order. Try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log("Order created:", data.order_id);
+
     initiatePayment({
-      key: "rzp_live_QxWMEYJBmq2amj", // Your actual Razorpay key ID
-      amount: 9900, // ₹99 in paise
+      key: "rzp_live_QxWMEYJBmq2amj", // Your Razorpay key ID
+      amount: 9900,
       name: "StockyTips Trading Masterclass",
       description: "Master the Art of Stock Trading - July 05, 2025",
+      order_id: data.order_id, // ✅ Add the Razorpay order_id here
       handler: (response: any) => {
         console.log("Payment Success:", response);
         toast({
           title: "Payment Successful! 🎉",
           description: "Redirecting you to WhatsApp group...",
         });
-        
-        // Redirect to WhatsApp after successful payment
+
         setTimeout(() => {
           setShowWhatsAppRedirect(true);
         }, 2000);
@@ -74,7 +98,17 @@ const Index = () => {
         },
       },
     });
-  };
+
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    toast({
+      title: "Error",
+      description: "Something went wrong while processing your request.",
+      variant: "destructive",
+    });
+  }
+};
+
 
   const handleWhatsAppJoin = () => {
     // Replace with your actual WhatsApp group link

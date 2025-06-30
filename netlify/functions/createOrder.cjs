@@ -1,30 +1,31 @@
-const Razorpay = require("razorpay");
-
 exports.handler = async function (event, context) {
-  try {
-    const instance = new Razorpay({
-      key_id: "rzp_live_QxWMEYJBmq2amj",
+  const Razorpay = require("razorpay");
+
+  const instance = new Razorpay({
+    key_id: "rzp_live_QxWMEYJBmq2amj",
       key_secret: "bnele52tIDdbiaurLlpofGDq"
-    });
+  });
 
-    const order = await instance.orders.create({
-      amount: 9900,
-      currency: "INR",  
-      receipt: "receipt#1",
-      notes: {
-        key1: "value3",
-        key2: "value2"
-      }
-    });
+  const body = JSON.parse(event.body);
 
+  const options = {
+    amount: body.amount, // in paise
+    currency: "INR",
+    receipt: "receipt_order_74394",
+    payment_capture: 1,
+  };
+
+  try {
+    const order = await instance.orders.create(options);
     return {
       statusCode: 200,
-      body: JSON.stringify(order)
+      body: JSON.stringify({ order_id: order.id }),
     };
-  } catch (error) {
+  } catch (err) {
+    console.error("Order creation failed:", err);
     return {
-      statusCode: 400,
-      body: JSON.stringify({ error: error.message })
+      statusCode: 500,
+      body: JSON.stringify({ error: "Failed to create Razorpay order" }),
     };
   }
 };
