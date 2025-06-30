@@ -1,31 +1,44 @@
-exports.handler = async function (event, context) {
-  const Razorpay = require("razorpay");
+const Razorpay = require("razorpay");
 
-  const instance = new Razorpay({
-    key_id: "rzp_live_QxWMEYJBmq2amj",
-      key_secret: "bnele52tIDdbiaurLlpofGDq"
+exports.handler = async function (event) {
+  let amount = 9900; // default ₹99
+
+  // ✅ Handle missing or invalid JSON
+  try {
+    if (event.body) {
+      const parsed = JSON.parse(event.body);
+      if (parsed.amount) {
+        amount = parsed.amount;
+      }
+    }
+  } catch (err) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Invalid JSON in request body" }),
+    };
+  }
+
+  const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
   });
 
-  const body = JSON.parse(event.body);
-
-  const options = {
-    amount: body.amount, // in paise
-    currency: "INR",
-    receipt: "receipt_order_74394",
-    payment_capture: 1,
-  };
-
   try {
-    const order = await instance.orders.create(options);
+    const order = await razorpay.orders.create({
+      amount,
+      currency: "INR",
+      receipt: "receipt#1",
+      payment_capture: 1,
+    });
+
     return {
       statusCode: 200,
       body: JSON.stringify({ order_id: order.id }),
     };
   } catch (err) {
-    console.error("Order creation failed:", err);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Failed to create Razorpay order" }),
+      body: JSON.stringify({ error: err.message }),
     };
   }
 };
